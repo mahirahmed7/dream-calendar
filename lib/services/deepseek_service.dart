@@ -2,15 +2,17 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class DeepSeekService {
-  static const String _baseUrl = 'https://api.deepseek.com/v1/chat/completions';
   final String apiKey;
+  final String baseUrl = 'https://api.deepseek.com/v1';
 
   DeepSeekService({required this.apiKey});
 
-  Future<List<String>> generateTasks(DateTime date) async {
+  Future<List<String>> generateTasks(DateTime date, {String? customPrompt}) async {
     try {
+      final prompt = customPrompt ?? 'Generate a list of productive tasks for ${date.toString().split(' ')[0]}';
+      
       final response = await http.post(
-        Uri.parse(_baseUrl),
+        Uri.parse('$baseUrl/chat/completions'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $apiKey',
@@ -19,12 +21,15 @@ class DeepSeekService {
           'model': 'deepseek-chat',
           'messages': [
             {
+              'role': 'system',
+              'content': 'You are a helpful AI assistant that generates structured daily schedules and tasks. Keep responses concise and practical.',
+            },
+            {
               'role': 'user',
-              'content': 'Generate 3-5 suggested tasks or activities for ${_formatDate(date)}. '
-                  'Return them in a simple list format, one task per line, without numbers or bullet points.',
-            }
+              'content': prompt,
+            },
           ],
-          'temperature': 0.7,
+          'max_tokens': 500,
         }),
       );
 
@@ -32,17 +37,17 @@ class DeepSeekService {
         final data = jsonDecode(response.body);
         final content = data['choices'][0]['message']['content'] as String;
         
-        // Split the content into lines and clean up any empty lines
+        // Parse the response into a list of tasks
         return content
             .split('\n')
             .where((line) => line.trim().isNotEmpty)
-            .map((line) => line.trim())
+            .map((line) => line.replaceAll(RegExp(r'^\d+\.\s*'), ''))
             .toList();
       } else {
         throw Exception('Failed to generate tasks: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('Error generating tasks: $e');
+      throw Exception('Failed to generate tasks: $e');
     }
   }
 
