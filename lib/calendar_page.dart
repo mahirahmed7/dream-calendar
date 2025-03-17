@@ -19,8 +19,8 @@ class _CalendarPageState extends State<CalendarPage> {
   bool _isLoading = false;
   String? _error;
   
-  // Initialize DeepSeek service with your API key
-  final _deepSeekService = DeepSeekService(apiKey: 'YOUR_API_KEY');
+  // Initialise DeepSeek service with your API key
+  final _deepSeekService = DeepSeekService(apiKey: 'sk-1e132d0c8a57469ea4b5140b19621eed');
 
   @override
   void dispose() {
@@ -183,15 +183,14 @@ class _CalendarPageState extends State<CalendarPage> {
                       _error = null;
                     });
                   },
-                  calendarStyle: const CalendarStyle(
+                  calendarStyle: CalendarStyle(
                     selectedDecoration: BoxDecoration(
                       color: Colors.blue,
                       shape: BoxShape.circle,
                     ),
                     todayDecoration: BoxDecoration(
-                      color: Colors.blue,
+                      color: Colors.blue.withOpacity(0.5),
                       shape: BoxShape.circle,
-                      opacity: 0.5,
                     ),
                     markerDecoration: BoxDecoration(
                       color: Colors.red,
